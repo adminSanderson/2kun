@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+{% load b64encode %}
+<head>
+  <meta charset="UTF-8">
+  <title>UpTap</title>
+  <link rel="stylesheet" href="{% static 'main/style.css' %}">
+</head>
+<body>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          document.querySelectorAll('.reply-toggle').forEach(function(link) {
+            link.addEventListener('click', function() {
+              var postId = this.getAttribute('data-post');
+              var form = document.getElementById('reply-form-' + postId);
+              if (form.style.display === 'none' || !form.style.display) {
+                form.style.display = 'block';
+                this.textContent = '<<<';  // меняем стрелочку на закрытие
+              } else {
+                form.style.display = 'none';
+                this.textContent = '>>>';
+              }
+            });
+          });
+        });
+        </script>
+        
+  <header>
+    <h1><a href="/">UpTap</a></h1>
+    <div class="boardlist">
+      {% for b in Board.objects.all %}
+        <a href="{% url 'board_detail' b.slug %}">/{{ b.slug }}/</a>
+      {% endfor %}
+    </div>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer>© 2025 UpTap</footer>
+</body>
+</html>

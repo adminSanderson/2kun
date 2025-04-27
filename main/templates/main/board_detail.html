@@ -1,0 +1,73 @@
+{% extends 'main/base.html' %}
+{% load b64encode %}
+
+{% block content %}
+  <h2>/{{ board.slug }}/ – {{ board.name }}</h2>
+
+  {# Форма нового треда (осталась без изменений) #}
+  <div class="new-post">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form.author_name }}<br>
+      {{ form.title }}<br>
+      {{ form.content }}<br>
+      {{ form.image }}<br>
+      {{ form.parent }}     {# пустой parent → новый тред #}
+      <button type="submit" class="btn-submit">Создать новый тред</button>
+    </form>
+  </div>  
+
+  {% for post in posts %}
+    <div class="post" id="post-{{ post.id }}">
+      <div class="post-title">
+        No.{{ post.id }} <strong>{{ post.title }}</strong>
+        <span class="author-name">{{ post.author_name }}</span>
+        <span class="reply-toggle" data-post="{{ post.id }}">>>></span>
+      </div>
+      {% if post.image_data %}
+        <div class="post-image">
+            <img src="data:{{ post.image_mime }};base64,{{ post.image_data|b64encode }}"
+                alt="image" style="max-width:300px;">
+        </div>
+      {% endif %}
+      <div class="post-meta">{{ post.created_at|date:"d.m.Y H:i" }} | IP: {{ post.ip_address }}</div>
+      <div class="post-content">{{ post.content|linebreaksbr }}</div>
+
+      {# Скрытая форма ответа #}
+      <div class="new-post reply-form" id="reply-form-{{ post.id }}">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          {{ form.author_name }}<br>
+          {{ form.title }}<br>
+          {{ form.content }}<br>
+          {{ form.image }}<br>
+          <input type="hidden" name="parent" value="{{ post.id }}">
+          <button type="submit" class="btn-submit">Ответить</button>
+        </form>
+      </div>
+      
+
+      {# Вложенные ответы (оставляем как есть) #}
+      {% for reply in post.replies.all %}
+        <div class="post reply" style="margin-left: 20px; background: #F5F5F5;">
+            <div class="post-title">
+            Ответ No.{{ reply.id }} <strong>{{ reply.title }}</strong>
+            <span class="author-name">{{ reply.author_name }}</span>
+            </div>
+
+            {% if reply.image_data %}
+            <div class="post-image">
+                <img src="data:{{ reply.image_mime }};base64,{{ reply.image_data|b64encode }}"
+                    alt="image" style="max-width:250px;">
+            </div>
+            {% endif %}
+
+            <div class="post-content">{{ reply.content|linebreaksbr }}</div>
+            <div class="post-meta">{{ reply.created_at|date:"d.m.Y H:i" }} | IP: {{ reply.ip_address }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% empty %}
+    <p>Постов пока нет.</p>
+  {% endfor %}
+{% endblock %}

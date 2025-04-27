@@ -1,0 +1,10 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+  <h2>Список досок</h2>
+  <ul class="board-list">
+    {% for board in boards %}
+      <li><a href="{% url 'board_detail' board.slug %}">/{{ board.slug }}/ – {{ board.name }}</a></li>
+    {% endfor %}
+  </ul>
+{% endblock %}
